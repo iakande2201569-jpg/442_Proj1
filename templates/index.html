@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microscope Specimen Size Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Specimen Size Calculator</h1>
+        
+        <div class="card form-section">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" name="username" required placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label>Measured Size (mm):</label>
+                    <input type="number" step="any" name="measured_size" required placeholder="e.g., 5.0">
+                </div>
+                <div class="form-group">
+                    <label>Microscope Type:</label>
+                    <select name="microscope_type" required>
+                        {% for m in microscopes %}
+                        <option value="{{ m }}">{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Unit:</label>
+                    <select name="unit" required>
+                        {% for u in units %}
+                        <option value="{{ u }}">{{ u }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Upload Specimen Image:</label>
+                    <input type="file" name="specimen_image" accept="image/*" required>
+                </div>
+                <button type="submit">Calculate Real Size</button>
+            </form>
+        </div>
+
+        {% if result %}
+        <div class="card result-section">
+            <h2>Calculation Result</h2>
+            {% if result.filename %}
+                <img src="{{ url_for('static', filename='uploads/' + result.filename) }}" alt="Specimen Preview" class="preview-img">
+            {% endif %}
+            <p><strong>Breakdown:</strong></p>
+            <p>Formula: Real Size = Measured Size (mm) ÷ Magnification Factor</p>
+            <p>Calculation: {{ result.measured }} mm ÷ {{ result.mag_factor }}</p>
+            <h3 class="final-answer">Actual Size: {{ "%.4f"|format(result.real_size) }} {{ result.unit }}</h3>
+        </div>
+        {% endif %}
+
+        <div class="card history-section">
+            <h2>Calculation History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User</th>
+                        <th>Microscope</th>
+                        <th>Measured (mm)</th>
+                        <th>Real Size</th>
+                        <th>Image</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.username }}</td>
+                        <td>{{ item.microscope_type }}</td>
+                        <td>{{ item.measured_size }}</td>
+                        <td>{{ "%.4f"|format(item.real_size) }} {{ item.unit }}</td>
+                        <td>{% if item.image_filename %}Yes{% else %}No{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
